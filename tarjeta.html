@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Un Regalo Para Ti!</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #0a0033 0%, #1a0066 50%, #2d1b69 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Partículas de fondo */
+        .background-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .photos-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            padding: 40px 20px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 105, 180, 0.6) rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilos para la barra de desplazamiento en Chrome */
+        .photos-container::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .photos-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .photos-container::-webkit-scrollbar-thumb {
+            background: rgba(255, 105, 180, 0.6);
+            border-radius: 10px;
+            border: 3px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .photos-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 105, 180, 0.8);
+        }
+
+        .photo-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transform: scale(0) rotate(-15deg);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .photo-wrapper.show {
+            opacity: 1;
+            transform: scale(1) rotate(0deg);
+        }
+
+        .photo {
+            width: min(250px, 45vw);
+            height: min(250px, 45vw);
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 15px 40px rgba(255, 20, 147, 0.4);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .photo-wrapper:hover .photo {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 20px 50px rgba(255, 20, 147, 0.6);
+        }
+
+        .photo-message {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 182, 193, 0.9) 100%);
+            color: #333;
+            padding: 12px 20px;
+            border-radius: 25px;
+            margin-top: 15px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: center;
+            max-width: min(300px, 80vw);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .photo-message::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.8s ease;
+        }
+
+        .photo-wrapper.show .photo-message {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .photo-wrapper:hover .photo-message::before {
+            left: 100%;
+        }
+
+        .photo-message.love {
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.95) 0%, rgba(255, 105, 180, 0.9) 100%);
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-message.joy {
+            background: linear-gradient(135deg, rgba(255, 255, 0, 0.95) 0%, rgba(255, 215, 0, 0.9) 100%);
+            color: #333;
+        }
+
+        .photo-message.memory {
+            background: linear-gradient(135deg, rgba(173, 216, 230, 0.95) 0%, rgba(135, 206, 235, 0.9) 100%);
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-message.dream {
+            background: linear-gradient(135deg, rgba(221, 160, 221, 0.95) 0%, rgba(147, 112, 219, 0.9) 100%);
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-message.heart {
+            background: linear-gradient(135deg, rgba(255, 20, 147, 0.95) 0%, rgba(199, 21, 133, 0.9) 100%);
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-message.sparkle {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95) 0%, rgba(255, 165, 0, 0.9) 100%);
+            color: #fff;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .gift-container {
+            position: relative;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            perspective: 1500px;
+            z-index: 10;
+            user-select: none;
+        }
+
+        .gift {
+            width: 280px;
+            height: 280px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: float 6s ease-in-out infinite;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: drop-shadow(0 30px 60px rgba(255, 20, 147, 0.4));
+        }
+
+        .gift:hover {
+            transform: scale(1.05) rotateY(15deg) rotateX(10deg);
+            filter: drop-shadow(0 40px 80px rgba(255, 20, 147, 0.6));
+        }
+
+        .gift.clicked {
+            animation: explode 1.2s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { 
+                transform: scale(1) rotateY(0deg) rotateX(0deg); 
+                filter: drop-shadow(0 30px 60px rgba(255, 20, 147, 0.4));
+            }
+            30% { 
+                transform: scale(1.1) rotateY(45deg) rotateX(15deg); 
+                filter: drop-shadow(0 50px 100px rgba(255, 20, 147, 0.8));
+            }
+            70% { 
+                transform: scale(1.5) rotateY(270deg) rotateX(45deg); 
+                filter: drop-shadow(0 60px 120px rgba(255, 20, 147, 0.9));
+                opacity: 0.7;
+            }
+            100% { 
+                transform: scale(0.2) rotateY(720deg) rotateX(90deg); 
+                filter: drop-shadow(0 0 0 transparent);
+                opacity: 0; 
+            }
+        }
+
+        /* Caja base con efecto 3D */
+        .gift-box {
+            position: absolute;
+            width: 100%;
+            height: 70%;
+            bottom: 0;
+            transform-style: preserve-3d;
+        }
+
+        .box-face {
+            position: absolute;
+            background: linear-gradient(145deg, #ff1493 0%, #ff69b4 30%, #ffb6c1 70%, #ffc0cb 100%);
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .box-front, .box-back {
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+        }
+
+        .box-front {
+            transform: translateZ(140px);
+            background: linear-gradient(145deg, #ff1493 0%, #ff69b4 50%, #ffb6c1 100%);
+            box-shadow: inset 0 10px 30px rgba(255, 255, 255, 0.2);
+        }
+
+        .box-back {
+            transform: translateZ(-140px) rotateY(180deg);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 50%, #ff69b4 100%);
+        }
+
+        .box-left, .box-right {
+            width: 280px;
+            height: 100%;
+            border-radius: 15px;
+        }
+
+        .box-left {
+            transform: rotateY(-90deg) translateZ(140px);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 50%, #ff69b4 100%);
+        }
+
+        .box-right {
+            transform: rotateY(90deg) translateZ(140px);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 50%, #ff69b4 100%);
+        }
+
+        .box-bottom {
+            width: 100%;
+            height: 280px;
+            transform: rotateX(-90deg) translateZ(100%);
+            background: linear-gradient(145deg, #8b0000 0%, #dc143c 50%, #ff1493 100%);
+            border-radius: 15px;
+        }
+
+        /* Tapa de la caja */
+        .gift-lid {
+            position: absolute;
+            width: 105%;
+            height: 35%;
+            top: -5%;
+            left: -2.5%;
+            transform-style: preserve-3d;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .gift:hover .gift-lid {
+            transform: translateY(-20px) rotateX(-10deg);
+        }
+
+        .lid-face {
+            position: absolute;
+            background: linear-gradient(145deg, #ff69b4 0%, #ffb6c1 30%, #ffc0cb 70%, #ffb6c1 100%);
+            border: 3px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .lid-top {
+            width: 100%;
+            height: 100%;
+            transform: translateZ(147px);
+            border-radius: 20px 20px 15px 15px;
+            background: linear-gradient(145deg, #ff69b4 0%, #ffb6c1 50%, #ffc0cb 100%);
+            box-shadow: inset 0 10px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .lid-front, .lid-back {
+            width: 100%;
+            height: 50px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .lid-front {
+            transform: translateZ(147px) translateY(100%);
+            background: linear-gradient(145deg, #ff1493 0%, #ff69b4 100%);
+        }
+
+        .lid-back {
+            transform: translateZ(-147px) translateY(100%) rotateY(180deg);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 100%);
+        }
+
+        .lid-left, .lid-right {
+            width: 294px;
+            height: 50px;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .lid-left {
+            transform: rotateY(-90deg) translateZ(147px) translateY(100%);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 100%);
+        }
+
+        .lid-right {
+            transform: rotateY(90deg) translateZ(147px) translateY(100%);
+            background: linear-gradient(145deg, #dc143c 0%, #ff1493 100%);
+        }
+
+        /* Cintas mejoradas */
+        .ribbon-vertical {
+            position: absolute;
+            width: 60px;
+            height: 120%;
+            background: linear-gradient(to right, 
+                #ffffff 0%, 
+                #ffe4e1 20%, 
+                #ffd1dc 40%, 
+                #ffffff 50%, 
+                #ffd1dc 60%, 
+                #ffe4e1 80%, 
+                #ffffff 100%);
+            left: 50%;
+            top: -10%;
+            transform: translateX(-50%);
+            border-radius: 8px;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.8),
+                inset 0 5px 15px rgba(255, 255, 255, 0.5),
+                inset 0 -5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 15;
+        }
+
+        .ribbon-horizontal {
+            position: absolute;
+            width: 120%;
+            height: 60px;
+            background: linear-gradient(to bottom, 
+                #ffffff 0%, 
+                #ffe4e1 20%, 
+                #ffd1dc 40%, 
+                #ffffff 50%, 
+                #ffd1dc 60%, 
+                #ffe4e1 80%, 
+                #ffffff 100%);
+            left: -10%;
+            top: 50%;
+            transform: translateY(-50%);
+            border-radius: 8px;
+            box-shadow: 
+                0 0 20px rgba(255, 255, 255, 0.8),
+                inset 5px 0 15px rgba(255, 255, 255, 0.5),
+                inset -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 15;
+        }
+
+        /* Moño elegante */
+        .bow {
+            position: absolute;
+            top: -15%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+        }
+
+        .bow-center {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(145deg, #ffffff 0%, #ffd1dc 50%, #ffffff 100%);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.3),
+                inset 0 5px 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .bow-left, .bow-right {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #ffffff 0%, #ffe4e1 30%, #ffd1dc 70%, #ffffff 100%);
+            border-radius: 50% 20% 50% 20%;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.2),
+                inset 5px 5px 20px rgba(255, 255, 255, 0.8),
+                inset -5px -5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .bow-left {
+            left: -60px;
+            transform: translateY(-50%) rotate(-15deg);
+        }
+
+        .bow-right {
+            right: -60px;
+            transform: translateY(-50%) rotate(15deg);
+        }
+
+        /* Efectos de luz */
+        .gift::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+            border-radius: 50px;
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotateY(0deg) rotateX(0deg); }
+            25% { transform: translateY(-10px) rotateY(3deg) rotateX(2deg); }
+            50% { transform: translateY(-20px) rotateY(0deg) rotateX(0deg); }
+            75% { transform: translateY(-10px) rotateY(-3deg) rotateX(-2deg); }
+        }
+
+        @keyframes confettiFall {
+            0% { 
+                transform: translateY(-50px) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+
+        .message {
+            position: absolute;
+            color: #ffffff;
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(80px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            font-weight: 300;
+            letter-spacing: 1px;
+            max-width: 90vw;
+        }
+
+        .message.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .close-button {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 24px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            z-index: 101;
+        }
+
+        .close-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .photo-counter {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1.2rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 102;
+        }
+
+        .photo-counter.show {
+            opacity: 1;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .gift {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .message {
+                font-size: 1.3rem;
+                padding: 0 20px;
+            }
+            
+            .photos-container {
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .bow-left, .bow-right {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .bow-left {
+                left: -45px;
+            }
+            
+            .bow-right {
+                right: -45px;
+            }
+            
+            .photo-message {
+                font-size: 0.9rem;
+                padding: 10px 16px;
+                max-width: min(250px, 75vw);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .gift {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .photo {
+                width: min(200px, 80vw) !important;
+                height: min(200px, 80vw) !important;
+            }
+            
+            .ribbon-vertical {
+                width: 40px;
+            }
+            
+            .ribbon-horizontal {
+                height: 40px;
+            }
+            
+            .bow-center {
+                width: 30px;
+                height: 40px;
+            }
+            
+            .bow-left, .bow-right {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .photo-message {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+                max-width: min(200px, 85vw);
+            }
+        }
+
+        /* Modo oscuro automático */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #0a001a 0%, #1a0033 50%, #2d1b4d 100%);
+            }
+        }
+
+        /* Animaciones adicionales */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .gift-container:active .gift {
+            animation: pulse 0.3s ease;
+        }
+
+        /* Mejora de accesibilidad */
+        @media (prefers-reduced-motion: reduce) {
+            .gift, .photo, .message, .confetti {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-particles" id="particles"></div>
+    
+    <div class="gift-container" onclick="openGift()" role="button" tabindex="0" aria-label="Hacer clic para abrir el regalo">
+        <div class="gift">
+            <!-- Caja base 3D -->
+            <div class="gift-box">
+                <div class="box-face box-front"></div>
+                <div class="box-face box-back"></div>
+                <div class="box-face box-left"></div>
+                <div class="box-face box-right"></div>
+                <div class="box-face box-bottom"></div>
+            </div>
+            
+            <!-- Tapa de la caja -->
+            <div class="gift-lid">
+                <div class="lid-face lid-top"></div>
+                <div class="lid-face lid-front"></div>
+                <div class="lid-face lid-back"></div>
+                <div class="lid-face lid-left"></div>
+                <div class="lid-face lid-right"></div>
+            </div>
+            
+            <!-- Cintas decorativas -->
+            <div class="ribbon-vertical"></div>
+            <div class="ribbon-horizontal"></div>
+            
+            <!-- Moño elegante -->
+            <div class="bow">
+                <div class="bow-left"></div>
+                <div class="bow-center"></div>
+                <div class="bow-right"></div>
+            </div>
+        </div>
+        <div class="message">¡Haz clic para abrir tu regalo especial!</div>
+    </div>
+
+    <div class="photos-container" role="dialog" aria-label="Galería de fotos">
+        <button class="close-button" onclick="closePhotos()" aria-label="Cerrar galería">×</button>
+        <div class="photo-counter"><span id="current-photo">0</span> / <span id="total-photos">6</span></div>
+        
+        <div class="photo-wrapper">
+            <img src="foto1.jpg" class="photo" alt="Foto especial 1" loading="lazy">
+            <div class="photo-message love">💕 Feliz Cumpleaños Mayi 💕</div>
+        </div>
+        
+        <div class="photo-wrapper">
+            <img src="foto2.jpg" class="photo" alt="Foto especial 2" loading="lazy">
+            <div class="photo-message joy">✨ La alegría que das no tiene precio ✨</div>
+        </div>
+        
+        <div class="photo-wrapper">
+            <img src="foto3.jpg" class="photo" alt="Foto especial 3" loading="lazy">
+            <div class="photo-message memory">🌟 eres unica e inigualable 🌟</div>
+        </div>
+        
+        <div class="photo-wrapper">
+            <img src="foto4.jpg" class="photo" alt="Foto especial 4" loading="lazy">
+            <div class="photo-message dream">🦋 Tu sonrisa ilumina cualquier dia 🦋</div>
+        </div>
+        
+        <div class="photo-wrapper">
+            <img src="foto5.jpg" class="photo" alt="Foto especial 5" loading="lazy">
+            <div class="photo-message heart">❤️ Gracias por ser tan maravillosa y especial ❤️</div>
+        </div>
+        
+        <div class="photo-wrapper">
+            <img src="foto6.jpg" class="photo" alt="Foto especial 6" loading="lazy">
+            <div class="photo-message sparkle">🎁 Eres el regalo más hermoso que Dios me ha dado 🎁</div>
+        </div>
+    </div>
+
+    <script>
+        let giftOpened = false;
+        let photosShown = 0;
+
+        // Crear partículas de fondo
+        function createBackgroundParticles() {
+            const container = document.getElementById('particles');
+            for(let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Mostrar mensaje inicial
+        setTimeout(() => {
+            document.querySelector('.message').classList.add('show');
+        }, 500);
+
+        // Crear confeti mejorado
+        function createConfetti() {
+            const colors = ['#ff69b4', '#ff1493', '#fff', '#ffd700', '#00ff00', '#00bfff'];
+            const shapes = ['circle', 'square'];
+            
+            for(let i = 0; i < 80; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                const isSquare = Math.random() > 0.5;
+                if (isSquare) {
+                    confetti.style.borderRadius = '2px';
+                    confetti.style.width = '6px';
+                    confetti.style.height = '6px';
+                }
+                
+                confetti.style.left = Math.random() * window.innerWidth + 'px';
+                confetti.style.top = '-50px';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                
+                document.body.appendChild(confetti);
+                
+                const duration = 3 + Math.random() * 4;
+                confetti.style.animation = `confettiFall ${duration}s linear`;
+                
+                setTimeout(() => {
+                    if (confetti.parentNode) {
+                        confetti.remove();
+                    }
+                }, duration * 1000);
+            }
+        }
+
+        function openGift() {
+            if (giftOpened) return;
+            
+            giftOpened = true;
+            
+            // Efecto en el regalo
+            const gift = document.querySelector('.gift');
+            const giftContainer = document.querySelector('.gift-container');
+            
+            gift.classList.add('clicked');
+            
+            // Crear confeti
+            createConfetti();
+            setTimeout(createConfetti, 500);
+            setTimeout(createConfetti, 1000);
+            
+            // Mostrar fotos después de la animación del regalo
+            setTimeout(() => {
+                const photosContainer = document.querySelector('.photos-container');
+                const closeButton = document.querySelector('.close-button');
+                const photoCounter = document.querySelector('.photo-counter');
+                
+                photosContainer.style.display = 'flex';
+                closeButton.style.display = 'flex';
+                photoCounter.classList.add('show');
+                
+                // Mostrar fotos una por una
+                const photoWrappers = document.querySelectorAll('.photo-wrapper');
+                photoWrappers.forEach((wrapper, index) => {
+                    setTimeout(() => {
+                        wrapper.classList.add('show');
+                        photosShown++;
+                        document.getElementById('current-photo').textContent = photosShown;
+                        
+                        // Efecto de sonido simulado con vibración (si está disponible)
+                        if ('vibrate' in navigator) {
+                            navigator.vibrate(50);
+                        }
+                        
+                        // Mostrar mensaje después de la foto
+                        setTimeout(() => {
+                            const message = wrapper.querySelector('.photo-message');
+                            if (message) {
+                                message.style.opacity = '1';
+                                message.style.transform = 'translateY(0)';
+                            }
+                        }, 400);
+                    }, index * 800);
+                });
+            }, 800);
+        }
+
+        function closePhotos() {
+            const photosContainer = document.querySelector('.photos-container');
+            const closeButton = document.querySelector('.close-button');
+            const photoCounter = document.querySelector('.photo-counter');
+            const photoWrappers = document.querySelectorAll('.photo-wrapper');
+            
+            // Ocultar fotos con animación
+            photoWrappers.forEach((wrapper, index) => {
+                setTimeout(() => {
+                    wrapper.classList.remove('show');
+                    const message = wrapper.querySelector('.photo-message');
+                    if (message) {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateY(20px)';
+                    }
+                }, index * 100);
+            });
+            
+            setTimeout(() => {
+                photosContainer.style.display = 'none';
+                closeButton.style.display = 'none';
+                photoCounter.classList.remove('show');
+                
+                // Navegar a index.html después de cerrar la galería
+                window.location.href = './index.html';
+                
+                // Resetear para poder abrir de nuevo (aunque no se use por la navegación)
+                giftOpened = false;
+                photosShown = 0;
+                document.getElementById('current-photo').textContent = '0';
+                
+                // Restaurar el regalo
+                const gift = document.querySelector('.gift');
+                gift.classList.remove('clicked');
+                gift.style.transform = '';
+                gift.style.opacity = '';
+            }, 800);
+        }
+
+        // Soporte para teclado
+        document.querySelector('.gift-container').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                openGift();
+            }
+        });
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.querySelector('.photos-container').style.display === 'flex') {
+                closePhotos();
+            }
+        });
+
+        // Inicializar
+        createBackgroundParticles();
+        
+        // Confeti inicial más sutil
+        setTimeout(() => {
+            for(let i = 0; i < 20; i++) {
+                setTimeout(createConfetti, i * 200);
+            }
+        }, 2000);
+
+        // Error handling para imágenes
+        document.querySelectorAll('.photo').forEach((photo, index) => {
+            photo.addEventListener('error', () => {
+                photo.src = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300"><rect width="300" height="300" fill="%23ff69b4"/><text x="50%" y="50%" text-anchor="middle" dy=".3em" fill="white" font-size="20">Foto ${index + 1}</text></svg>`;
+            });
+        });
+    </script>
+</body>
+</html>

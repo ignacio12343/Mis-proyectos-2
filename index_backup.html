@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feliz Cumpleaños Mayo</title>
+<style>
+    /* Fuegos artificiales y frases */
+    html, body {
+        heigh    <h1>✨ ¡Feliz Cumpleaños, Mi Querida Mayo! ✨</h1>
+    <h2>Con todo mi cariño para ti espero te guste lo que prepare te deseo lo mejor hoy en tu dia  💖</h2>
+    <p>
+        Hoy el cielo brilla más que nunca, porque celebramos tu vida.<br>
+        En este día tan especial, quiero decirte lo mucho que significas para mí.<br>
+        Eres un regalo de Dios, una bendición que ilumina cada uno de mis días.<br>
+        Tu sonrisa es capaz de alegrar hasta el día más gris,<br>
+        tu bondad no conoce límites y tu amor es un tesoro invaluable.<br>
+        Que este nuevo año de vida venga lleno de bendiciones, alegrías y sueños cumplidos.<br>
+        Que Dios te proteja siempre y guíe cada uno de tus pasos.<br>
+        ¡Te quiero muchísimo mi amor! 🌹✨💝
+    </p>
+    <button class="btn-sorpresa" onclick="mostrarTarjetas()">Presiona para ver tu sorpresa ✨</button>       margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        overflow-x: hidden;
+        background: #0a0033;
+        line-height: 1.6;
+    }
+    /* Canvas para estrellas y estrellas fugaces */
+    .stars-bg-canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+        pointer-events: none;
+    }
+    .rose-animation {
+        position: fixed;
+        top: 0; left: 0; width: 100vw; height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        pointer-events: none;
+        z-index: 10;
+    }
+    .rose {
+        font-size: 3rem;
+        margin: 0 1.2vw;
+        opacity: 0;
+        filter: drop-shadow(0 0 10px rgba(255,105,180,0.3));
+        animation: fallRoses 2.5s ease-in-out forwards;
+    }
+    @keyframes fallRoses {
+        0% { opacity: 0; transform: translateY(-80px) scale(0.7) rotate(-20deg); }
+        30% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; transform: translateY(80vh) scale(1.2) rotate(20deg); }
+    }
+    .mensaje-cumple {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(145deg, rgba(255,255,255,0.95), rgba(255,192,203,0.95));
+        border-radius: 40px;
+        box-shadow: 0 15px 50px rgba(233,30,99,0.3), 0 0 120px rgba(233,30,99,0.2);
+        padding: 3.5rem 3rem;
+        max-width: 500px;
+        margin: 3rem auto;
+        border: none;
+        position: relative;
+        z-index: 20;
+        backdrop-filter: blur(12px);
+        transform: translateY(0);
+        transition: all 0.4s ease;
+    }
+    
+    .mensaje-cumple:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 60px rgba(233,30,99,0.4), 0 0 150px rgba(233,30,99,0.3);
+    }
+
+    @keyframes gradientMove {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    
+    @keyframes fadeInMsg {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+    .btn-sorpresa {
+        background: linear-gradient(45deg, #ff1744, #ff4081, #e91e63);
+        color: white;
+        padding: 18px 45px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border: 3px solid rgba(255,255,255,0.3);
+        border-radius: 50px;
+        cursor: pointer;
+        margin-top: 2rem;
+        box-shadow: 0 10px 25px rgba(255, 23, 68, 0.4), inset 0 -3px 8px rgba(0,0,0,0.2);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        position: relative;
+        overflow: hidden;
+    }
+    .btn-sorpresa:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 15px 30px rgba(255, 23, 68, 0.5);
+        border-color: rgba(255,255,255,0.5);
+        background: linear-gradient(45deg, #ff1744, #ff4081, #e91e63, #ff4081);
+        background-size: 200% 200%;
+        animation: gradientMove 2s ease infinite;
+    }
+    .pagina-tarjetas {
+        display: none;
+        width: 100%;
+        min-height: 100vh;
+        padding: 3rem 1rem 2rem 1rem;
+        background: rgba(10,0,51,0.92); /* fondo estrellado oscuro, semitransparente */
+        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+    }
+    .tarjeta-mensaje {
+        color: #d81b60;
+        position: relative;
+        overflow: hidden;
+        border-radius: 30px;
+        padding: 2.5rem 2rem;
+        font-size: 1.15rem;
+        box-shadow: 0 15px 35px rgba(233,30,99,0.2), 0 5px 15px rgba(233,30,99,0.15);
+        border: none;
+        text-align: center;
+        max-width: 500px;
+        width: 94vw;
+        margin: 2rem auto;
+        transform: translateY(40px) scale(0.95);
+        opacity: 0;
+        animation: showTarjeta 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        animation-delay: calc(var(--orden) * 0.15s);
+        transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(5px);
+        perspective: 1000px;
+    }
+    
+    .tarjeta-mensaje h3 {
+        text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+        font-weight: bold;
+        margin-bottom: 1rem;
+    }
+    
+    .tarjeta-mensaje p {
+        text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+        font-weight: 500;
+        margin: 0;
+        line-height: 1.6;
+    }
+
+    @keyframes showTarjeta {
+        0% {
+            transform: translateY(40px) scale(0.95) rotateX(10deg);
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            transform: translateY(0) scale(1) rotateX(0);
+            opacity: 1;
+        }
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 1"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto1.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 2"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto2.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 3"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto3.jpg');
+        background-size: cover;
+        background-position: 50% 22%; /* Ajuste para mostrar mejor la cara */
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 4"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto4.jpg');
+        background-size: cover;
+        background-position: 50% 28%; /* Ajuste para mostrar mejor la cara */
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 5"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto5.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .tarjeta-mensaje[style*="--orden: 6"] {
+        background: linear-gradient(165deg, rgba(255,255,255,0.5) 0%, rgba(255,240,246,0.5) 100%), url('foto6.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+    .tarjeta-mensaje:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(233,30,99,0.25), 0 8px 20px rgba(233,30,99,0.2);
+    }
+    .titulo-mensajes {
+        text-align: center;
+        margin: 2rem 0;
+        color: #fff;
+        text-shadow: 0 0 10px rgba(255,105,180,0.5);
+    }
+    .titulo-mensajes h2 {
+        font-size: 1.8rem;
+        margin: 0;
+        padding: 1rem;
+        background: linear-gradient(45deg, rgba(233,30,99,0.2), rgba(255,105,180,0.2));
+        border-radius: 20px;
+        backdrop-filter: blur(5px);
+    }
+
+    @keyframes heartBeat {
+        0% { transform: scale(1) rotate(0deg) translateY(0) translateZ(0); filter: brightness(1); }
+        10% { transform: scale(1.2) rotate(3deg) translateY(-5px) translateZ(20px); filter: brightness(1.2); }
+        20% { transform: scale(0.9) rotate(-2deg) translateY(0) translateZ(10px); filter: brightness(0.95); }
+        30% { transform: scale(1.15) rotate(2deg) translateY(-3px) translateZ(15px); filter: brightness(1.15); }
+        40% { transform: scale(0.95) rotate(-1deg) translateY(0) translateZ(5px); filter: brightness(1); }
+        50% { transform: scale(1.1) rotate(1deg) translateY(-2px) translateZ(10px); filter: brightness(1.1); }
+        60% { transform: scale(1) rotate(0deg) translateY(0) translateZ(0); filter: brightness(1); }
+        100% { transform: scale(1) rotate(0deg) translateY(0) translateZ(0); filter: brightness(1); }
+    }
+    
+    .corazon-fotos img:nth-child(1) { top: 50%; left: 50%; transform: translate(-50%, -150%) rotate(-5deg) translateZ(10px); }
+    .corazon-fotos img:nth-child(2) { top: 50%; left: 50%; transform: translate(-150%, -100%) rotate(-15deg) translateZ(20px); }
+    .corazon-fotos img:nth-child(3) { top: 50%; left: 50%; transform: translate(50%, -100%) rotate(15deg) translateZ(20px); }
+    .corazon-fotos img:nth-child(4) { top: 50%; left: 50%; transform: translate(-150%, 0%) rotate(-10deg) translateZ(30px); }
+    .corazon-fotos img:nth-child(5) { top: 50%; left: 50%; transform: translate(50%, 0%) rotate(10deg) translateZ(30px); }
+    .corazon-fotos img:nth-child(6) { top: 50%; left: 50%; transform: translate(-50%, 100%) rotate(5deg) translateZ(10px); }
+
+    .corazon-fotos img:hover {
+        transform: scale(1.25) translateZ(50px) rotate(0deg) !important;
+        z-index: 10;
+        box-shadow: 0 15px 35px rgba(255,182,193,0.6), 0 5px 15px rgba(255,105,180,0.4);
+        border-color: rgba(255,182,193,1);
+    }
+</style>
+</head>
+<body>
+<canvas id="starsBgCanvas" class="stars-bg-canvas"></canvas>
+<audio id="cancionFondo" src="QueDiosTeBendiga.mp3" loop></audio>
+<div class="rose-animation" id="roseAnimation">
+    <span class="rose">🌹</span><span class="rose">🌹</span><span class="rose">🌹</span>
+</div>
+<div class="mensaje-cumple" id="mensajeCumple" style="display:none;">
+    <h1>✨ ¡Feliz Cumpleaños, Mayo! ✨</h1>
+    <h2>Con todo mi cariño para ti espero te guste lo que prepare te deseo lo  mejor hoy en tu dia ✨</h2>
+    <p>
+        En este día tan especial, quiero celebrar no solo tu cumpleaños,<br>
+        sino también la bendición que es tenerte en mi vida.<br>
+        Cada sonrisa tuya ilumina los días más grises y cada momento contigo es un regalo.<br>
+        Eres una persona extraordinaria, con un corazón de oro y un alma hermosa.<br>
+        Que Dios te bendiga siempre y te colme de alegrías infinitas.<br>
+        ¡Te quiero muchísimo! 🌹✨💖
+    </p>
+    <button class="btn-sorpresa" onclick="mostrarTarjetas()">Click para tu sorpresa ✨</button>
+</div>
+<!-- Juegos artificiales y frases eliminados -->
+<div class="pagina-tarjetas" id="paginaTarjetas">
+    <div class="titulo-mensajes">
+        <h2>✨ Mensajes especiales para ti ✨</h2>
+    </div>
+    <div class="tarjeta-mensaje" style="--orden: 1"><h3>🌟 Eres única 🌟</h3><p>No existe nadie como tú en este mundo. Tu personalidad, tu risa, tu forma de ser... todo en ti es especial y único.</p></div>
+    <div class="tarjeta-mensaje" style="--orden: 2"><h3>✨ Iluminas mi vida ✨</h3><p>Cada día contigo es una aventura maravillosa. Tu presencia transforma los momentos ordinarios en extraordinarios.</p></div>
+    <div class="tarjeta-mensaje" style="--orden: 3"><h3>💎 Vales más que cualquier tesoro 💎</h3><p>Tu amistad, tu cariño y tu corazón bondadoso son los regalos más preciados que alguien puede tener.</p></div>
+    <div class="tarjeta-mensaje" style="--orden: 4"><h3>🦋 Sigues volando alto 🦋</h3><p>Admiro tu fuerza, tu determinación y cómo siempre encuentras la manera de salir adelante con una sonrisa.</p></div>
+    <div class="tarjeta-mensaje" style="--orden: 5"><h3>🌸 Que este año sea mágico 🌸</h3><p>Que cada día de este nuevo año esté lleno de sorpresas hermosas, logros increíbles y momentos de pura felicidad.</p></div>
+    <div class="tarjeta-mensaje" style="--orden: 6"><h3>💝 Gracias por existir 💝</h3><p>El mundo es un lugar mejor porque tú estás en él. Gracias por ser esa persona maravillosa que alegra la vida de todos.</p></div>
+    <button class="btn-sorpresa" onclick="cerrarTarjetas()">Cerrar mensajes 💕</button>
+</div>
+<script>
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        document.getElementById('roseAnimation').style.display = 'none';
+        document.getElementById('mensajeCumple').style.display = 'flex';
+    }, 3500);
+    iniciarEstrellasBg();
+});
+function mostrarTarjetas() {
+    document.getElementById('mensajeCumple').style.display = 'none';
+    document.getElementById('paginaTarjetas').style.display = 'block';
+    reproducirCancion();
+    window.scrollTo(0, 0);
+    // Juegos artificiales eliminados
+}
+function cerrarTarjetas() {
+    document.getElementById('paginaTarjetas').style.display = 'none';
+    document.getElementById('mensajeCumple').style.display = 'flex';
+    window.scrollTo(0, 0);
+    // Juegos artificiales eliminados
+}
+function reproducirCancion() {
+    const cancion = document.getElementById('cancionFondo');
+    cancion.play().catch(err => console.log("Navegador bloqueó la reproducción:", err));
+}
+
+// Fondo estrellado con estrellas fugaces
+function iniciarEstrellasBg() {
+    const canvas = document.getElementById('starsBgCanvas');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    let meteors = [];
+    // Crear estrellas
+    for (let i = 0; i < 300; i++) {
+        stars.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.3,
+            alpha: Math.random() * 0.5 + 0.5,
+            twinkle: Math.random() * 0.05 + 0.01
+        });
+    }
+    function drawStars() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Estrellas
+        stars.forEach(star => {
+            star.alpha += (Math.random() - 0.5) * star.twinkle;
+            star.alpha = Math.max(0.3, Math.min(1, star.alpha));
+            ctx.globalAlpha = star.alpha;
+            ctx.beginPath();
+            ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff';
+            ctx.shadowColor = '#fff';
+            ctx.shadowBlur = 8;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        });
+        ctx.globalAlpha = 1;
+        // Estrellas fugaces
+        meteors.forEach(meteor => {
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(meteor.x, meteor.y);
+            ctx.lineTo(meteor.x - meteor.len * meteor.dx, meteor.y - meteor.len * meteor.dy);
+            ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+            ctx.lineWidth = meteor.size;
+            ctx.shadowColor = '#fff';
+            ctx.shadowBlur = 12;
+            ctx.stroke();
+            ctx.restore();
+        });
+    }
+    function updateStars() {
+        // Estrellas fugaces
+        meteors.forEach(meteor => {
+            meteor.x += meteor.dx * meteor.speed;
+            meteor.y += meteor.dy * meteor.speed;
+            meteor.len -= 0.7;
+        });
+        meteors = meteors.filter(m => m.x > -100 && m.y < canvas.height + 100 && m.len > 0);
+        // Lanzar nuevas estrellas fugaces
+        if (Math.random() < 0.012) {
+            let angle = Math.PI / 4 + Math.random() * Math.PI / 8;
+            meteors.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height * 0.5,
+                dx: Math.cos(angle),
+                dy: Math.sin(angle),
+                len: 120 + Math.random() * 60,
+                speed: 7 + Math.random() * 3,
+                size: 2 + Math.random() * 2
+            });
+        }
+    }
+    function loop() {
+        drawStars();
+        updateStars();
+        requestAnimationFrame(loop);
+    }
+    loop();
+}
+
+</script>
+</body>
+</html>
